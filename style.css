@@ -246,7 +246,7 @@ body {
     margin: 0;
 }
 
-/* แก้ไขใหม่: เพิ่ม padding เล็กน้อยและขยาย line-height เพื่อรองรับสระไทย */
+/* จัดสไตล์ข้อความปกติ */
 .label-text-row {
     width: 100%;
     text-align: center;
@@ -261,7 +261,6 @@ body {
     line-height: 1.25; 
 }
 
-/* แก้ไขใหม่: เปลี่ยนโครงสร้างเป็น inline-flex ช่วยจัดระเบียบแกนกลางของฟอนต์ */
 .scale-wrapper {
     display: inline-flex;
     align-items: center;
@@ -272,6 +271,22 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     line-height: 1.25;
+}
+
+/* เพิ่มสไตล์สำหรับโซนพื้นที่บาร์โค้ด */
+.label-barcode-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 2px 0;
+}
+
+.barcode-svg {
+    max-width: 96%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* 📱 ปรับหน้าตาสำหรับโทรศัพท์มือถือ */

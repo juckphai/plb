@@ -1,12 +1,17 @@
-let defaultTexts = ["PROMO-2026", "฿199.-", "รหัสสินค้า", "ลดล้างสต๊อก", "สินค้าแนะนำ"];
+let defaultTexts = ["สินค้าแนะนำ", "฿199.-", "8851234567890", "ลดล้างสต๊อก", "PROMO-2026"];
 let defaultStyles = ["normal", "bold", "normal", "normal", "normal"];
 
 function generateInputFields() {
     const rowCount = parseInt(document.getElementById('row-count').value);
+    const isBarcodeEnabled = document.getElementById('enable-barcode').checked;
     const container = document.getElementById('text-inputs-container');
     container.innerHTML = '';
 
-    for (let i = 0; i < rowCount; i++) {
+    // จำนวนแถวที่เป็นข้อความปกติ (ถ้าเปิดบาร์โค้ด แถวสุดท้ายจะถูกหักออกไปเป็นช่องบาร์โค้ดแยก)
+    const textRowsCount = isBarcodeEnabled ? rowCount - 1 : rowCount;
+
+    // 1. สร้างช่องกรอกข้อความปกติ
+    for (let i = 0; i < textRowsCount; i++) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'dynamic-row-input';
         rowDiv.innerHTML = `
@@ -24,13 +29,57 @@ function generateInputFields() {
         container.appendChild(rowDiv);
     }
 
-    document.querySelectorAll('.label-input-text').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const idx = e.target.getAttribute('data-index');
-            defaultTexts[idx] = e.target.value;
+    // 2. ถ้าเปิดใช้งานบาร์โค้ด ให้สร้างช่องกรอกบาร์โค้ดพิเศษโผล่ขึ้นมาต่อท้าย
+    if (isBarcodeEnabled) {
+        const barcodeIndex = rowCount - 1; // ชี้ไปที่ดัชนีแถวสุดท้ายเสมอ
+        const barcodeDiv = document.createElement('div');
+        barcodeDiv.className = 'dynamic-row-input';
+        // กำหนดกรอบสีทอง/ส้มเพื่อให้ผู้ใช้เห็นเด่นชัดว่าเป็นช่องระบบบาร์โค้ด
+        barcodeDiv.style.borderLeft = '3px solid var(--orange-color)';
+        barcodeDiv.style.backgroundColor = '#fffbeb';
+        
+        barcodeDiv.innerHTML = `
+            <div class="input-group">
+                <label style="color: #b45309; font-weight: bold;">📊 ระบุรหัสบาร์โค้ดสำหรับบรรทัดสุดท้าย (เฉพาะตัวเลข 12-13 หลัก)</label>
+                <input type="text" 
+                       id="barcode-numeric-input" 
+                       class="label-input-text" 
+                       data-index="${barcodeIndex}" 
+                       value="${defaultTexts[barcodeIndex] || ''}" 
+                       placeholder="ตัวอย่าง: 8851234567890"
+                       maxlength="13" 
+                       inputmode="numeric">
+            </div>
+        `;
+        container.appendChild(barcodeDiv);
+
+        // เพิ่มระบบจำกัดการป้อนข้อมูล: บังคับกรอกเฉพาะตัวเลขและห้ามเกิน 13 หลัก
+        const barcodeInput = document.getElementById('barcode-numeric-input');
+        barcodeInput.addEventListener('input', (e) => {
+            // ลบทุกอักขระที่ไม่ใช่ตัวเลขออกทันที (Regex \D)
+            let cleanValue = e.target.value.replace(/\D/g, '');
+            
+            // ตัดให้เหลือไม่เกิน 13 หลัก
+            if (cleanValue.length > 13) {
+                cleanValue = cleanValue.substring(0, 13);
+            }
+            
+            e.target.value = cleanValue;
+            defaultTexts[barcodeIndex] = cleanValue; // อัปเดตลงในฐานข้อมูล
         });
+    }
+
+    // ผูก Event Listener สำหรับช่องข้อความปกติ
+    document.querySelectorAll('.label-input-text').forEach(input => {
+        if (input.id !== 'barcode-numeric-input') { // ยกเว้นช่องบาร์โค้ดที่จัดการแยกไปแล้ว
+            input.addEventListener('input', (e) => {
+                const idx = e.target.getAttribute('data-index');
+                defaultTexts[idx] = e.target.value;
+            });
+        }
     });
 
+    // ผูก Event Listener สำหรับสไตล์ตัวอักษร
     document.querySelectorAll('.label-input-style').forEach(select => {
         select.addEventListener('change', (e) => {
             const idx = e.target.getAttribute('data-index');
@@ -57,6 +106,7 @@ function renderLabelsGrid() {
     const gapY = parseFloat(document.getElementById('gap-y').value) || 0;
     const borderStyle = document.getElementById('border-style').value;
     const rowCount = parseInt(document.getElementById('row-count').value);
+    const isBarcodeEnabled = document.getElementById('enable-barcode').checked;
 
     const maxPrintableWidth = 210 - (marginLeft + marginRight); 
     const maxPrintableHeight = 297 - (marginTop + marginBottom);
@@ -85,7 +135,15 @@ function renderLabelsGrid() {
         const labelBox = document.createElement('div');
         labelBox.className = 'label-item';
         labelBox.style.display = 'grid';
-        labelBox.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
+        
+        if (isBarcodeEnabled && rowCount > 1) {
+            let templates = "";
+            for(let r=0; r<rowCount-1; r++) templates += "1fr ";
+            templates += "1.8fr"; 
+            labelBox.style.gridTemplateRows = templates;
+        } else {
+            labelBox.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
+        }
         
         if (borderStyle === 'none') {
             labelBox.style.border = 'none';
@@ -95,15 +153,28 @@ function renderLabelsGrid() {
 
         for (let r = 0; r < rowCount; r++) {
             const textRow = document.createElement('div');
-            textRow.className = 'label-text-row';
-            textRow.style.fontWeight = defaultStyles[r];
+            
+            if (isBarcodeEnabled && r === rowCount - 1) {
+                textRow.className = 'label-barcode-row';
+                
+                let barcodeValue = (defaultTexts[r] || "0000000000000").trim();
+                const svgHtml = generateEAN13Svg(barcodeValue);
+                textRow.innerHTML = svgHtml;
+                
+                labelBox.appendChild(textRow);
+            } else {
+                textRow.className = 'label-text-row';
+                textRow.style.padding = '1px 0';
+                textRow.style.boxSizing = 'border-box';
+                textRow.style.fontWeight = defaultStyles[r];
 
-            const textWrapper = document.createElement('span');
-            textWrapper.className = 'scale-wrapper';
-            textWrapper.innerText = defaultTexts[r] || ' ';
+                const textWrapper = document.createElement('span');
+                textWrapper.className = 'scale-wrapper';
+                textWrapper.innerText = defaultTexts[r] || ' ';
 
-            textRow.appendChild(textWrapper);
-            labelBox.appendChild(textRow);
+                textRow.appendChild(textWrapper);
+                labelBox.appendChild(textRow);
+            }
         }
 
         gridContainer.appendChild(labelBox);
@@ -112,7 +183,71 @@ function renderLabelsGrid() {
     autoFitLabelFonts();
 }
 
-/* ─── ฟังก์ชันคำนวณขนาดอักษรอัตโนมัติ (เวอร์ชันปรับปรุงความแม่นยำภาษาไทย) ─── */
+/* ─── ระบบวิเคราะห์และสร้างโครงสร้างบาร์โค้ด EAN-13 แบบ Native SVG ─── */
+function generateEAN13Svg(value) {
+    let digits = value.replace(/\D/g, ''); 
+    if (digits.length < 12) digits = digits.padStart(12, '0');
+    digits = digits.substring(0, 12);
+    
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+        sum += parseInt(digits[i]) * (i % 2 === 0 ? 1 : 3);
+    }
+    let checkDigit = (10 - (sum % 10)) % 10;
+    let fullCode = digits + checkDigit;
+
+    const L_CODE = ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"];
+    const G_CODE = ["0100111", "0110011", "0011011", "0100001", "0011101", "0111001", "0000101", "0010001", "0001001", "0010111"];
+    const R_CODE = ["1110010", "1100110", "1101100", "1000010", "1011100", "1001110", "1010000", "1000100", "1001000", "1110100"];
+    const PARITY = ["LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG", "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"];
+
+    let firstDigit = parseInt(fullCode[0]);
+    let parityPattern = PARITY[firstDigit];
+
+    let binaryString = "101"; 
+    
+    for (let i = 1; i <= 6; i++) {
+        let digit = parseInt(fullCode[i]);
+        if (parityPattern[i - 1] === 'L') {
+            binaryString += L_CODE[digit];
+        } else {
+            binaryString += G_CODE[digit];
+        }
+    }
+    
+    binaryString += "01010"; 
+    
+    for (let i = 7; i <= 12; i++) {
+        let digit = parseInt(fullCode[i]);
+        binaryString += R_CODE[digit];
+    }
+    
+    binaryString += "101"; 
+
+    let svgWidth = 115;
+    let svgHeight = 40;
+    let startX = 10;
+    let barWidth = 0.85;
+
+    let paths = "";
+    for (let i = 0; i < binaryString.length; i++) {
+        if (binaryString[i] === '1') {
+            let isGuard = (i < 3 || (i >= 45 && i < 50) || i >= 92);
+            let barHeight = isGuard ? 30 : 24;
+            paths += `<rect x="${startX + (i * barWidth)}" y="2" width="${barWidth}" height="${barHeight}" fill="#000000"/>`;
+        }
+    }
+
+    let textY = 36;
+    let labelHtml = `
+        <text x="${startX - 6}" y="${textY - 3}" font-family="Arial" font-size="8" fill="#000">${fullCode[0]}</text>
+        <text x="${startX + 4}" y="${textY}" font-family="Arial" font-size="8" letter-spacing="1.2" fill="#000">${fullCode.substring(1,7)}</text>
+        <text x="${startX + 50}" y="${textY}" font-family="Arial" font-size="8" letter-spacing="1.2" fill="#000">${fullCode.substring(7,13)}</text>
+    `;
+
+    return `<svg class="barcode-svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">${paths}${labelHtml}</svg>`;
+}
+
 function autoFitLabelFonts() {
     const items = document.querySelectorAll('.label-item');
 
@@ -125,39 +260,42 @@ function autoFitLabelFonts() {
         const applyFont = (size) => {
             wrappers.forEach(span => {
                 span.style.fontSize = size + 'px';
+                span.style.lineHeight = '1';
                 span.style.transform = 'scale(1)';
             });
         };
 
         applyFont(fontSize);
 
-        // คำนวณความสูงต่อแถวจริง
-        const availableHeightPerRow = labelBox.clientHeight / rows.length;
-        let overflow = true;
+        if (rows.length > 0) {
+            const isBarcodeEnabled = document.getElementById('enable-barcode').checked;
+            const barcodeSpace = isBarcodeEnabled ? 1.8 : 0;
+            const availableHeightPerRow = (labelBox.clientHeight / (rows.length + barcodeSpace)) * 0.88;
+            
+            let overflow = true;
 
-        while (overflow && fontSize > 4) {
-            overflow = false;
-            applyFont(fontSize);
+            while (overflow && fontSize > 4) {
+                overflow = false;
+                applyFont(fontSize);
 
-            rows.forEach(row => {
-                const span = row.querySelector('.scale-wrapper');
-                // ใช้ getBoundingClientRect แม่นยำกว่าตรวจสอบจากตัวกล่องโดยรวม
-                const textHeight = span.getBoundingClientRect().height;
+                rows.forEach(row => {
+                    const span = row.querySelector('.scale-wrapper');
+                    if(span) {
+                        const textHeight = span.getBoundingClientRect().height;
+                        if (textHeight > (availableHeightPerRow * 0.92)) {
+                            overflow = true;
+                        }
+                    }
+                });
 
-                // เผื่อพื้นที่ 8% สำหรับสระบน-ล่างและส่วนประกอบอักษรภาษาไทย
-                if (textHeight > (availableHeightPerRow * 0.92)) {
-                    overflow = true;
+                if (overflow) {
+                    fontSize -= 0.5;
                 }
-            });
-
-            if (overflow) {
-                fontSize -= 0.5;
             }
         }
 
-        // ปรับขนาดความกว้างแนวนอน (บีบอักษรหากข้อความยาวเกินพิกัดขอบฉลาก)
         wrappers.forEach(span => {
-            const maxAllowedWidth = labelBox.clientWidth * 0.94; // เผื่อขอบข้าง 6% ปลอดภัยไว้ก่อน
+            const maxAllowedWidth = labelBox.clientWidth * 0.94; 
             const textWidth = span.getBoundingClientRect().width;
 
             if (textWidth > maxAllowedWidth) {
@@ -168,9 +306,9 @@ function autoFitLabelFonts() {
     });
 }
 
-// ─── ระบบควบคุมการเปลี่ยนหน้าจอ ───
 function generateAndShowPreview() {
     renderLabelsGrid();
+    document.getElementById('setup-page').className = 'page-view'; // ใช้รูปแบบเดิมเคลียร์คลาส
     document.getElementById('setup-page').classList.remove('active');
     document.getElementById('preview-page').classList.add('active');
     
@@ -195,6 +333,7 @@ function exportTemplate() {
         gapY: document.getElementById('gap-y').value,
         borderStyle: document.getElementById('border-style').value,
         rowCount: document.getElementById('row-count').value,
+        barcodeEnabled: document.getElementById('enable-barcode').checked,
         texts: defaultTexts,
         styles: defaultStyles
     };
@@ -240,6 +379,7 @@ function importTemplate(event) {
             document.getElementById('gap-y').value = configData.gapY;
             document.getElementById('border-style').value = configData.borderStyle;
             document.getElementById('row-count').value = configData.rowCount;
+            document.getElementById('enable-barcode').checked = configData.barcodeEnabled || false;
             
             defaultTexts = configData.texts;
             defaultStyles = configData.styles;
@@ -283,6 +423,10 @@ function exportToExcel() {
 }
 
 document.getElementById('row-count').addEventListener('change', () => {
+    generateInputFields();
+});
+
+document.getElementById('enable-barcode').addEventListener('change', () => {
     generateInputFields();
 });
 

@@ -6,7 +6,7 @@
     <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4) - Vector Text PDF</title>
     <link rel="stylesheet" href="style.css">
     
-    <link rel="manifest" href="manifest.json">
+    <link class="manifest" href="manifest.json">
     <meta name="theme-color" content="#2b579a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -69,11 +69,11 @@
                 <div class="grid-2col">
                     <div class="input-group">
                         <label>ความกว้างฉลาก (W)</label>
-                        <input type="number" id="label-width" value="22" min="5" max="190" step="0.5">
+                        <input type="number" id="label-width" value="40" min="5" max="190" step="0.5">
                     </div>
                     <div class="input-group">
                         <label>ความสูงฉลาก (H)</label>
-                        <input type="number" id="label-height" value="12" min="5" max="270" step="0.5">
+                        <input type="number" id="label-height" value="25" min="5" max="270" step="0.5">
                     </div>
                 </div>
                 <div class="grid-2col">
@@ -83,7 +83,7 @@
                     </div>
                     <div class="input-group">
                         <label>ช่องว่างแนวตั้ง (Gap Y)</label>
-                        <input type="number" id="gap-y" value="1" min="0" max="20" step="0.5">
+                        <input type="number" id="gap-y" value="2" min="0" max="20" step="0.5">
                     </div>
                 </div>
                 <div class="input-group">
@@ -103,11 +103,16 @@
                     <label>เลือกจำนวนแถวข้อความบนฉลาก</label>
                     <select id="row-count">
                         <option value="1">1 แถว</option>
-                        <option value="2" selected>2 แถว</option>
-                        <option value="3">3 แถว</option>
+                        <option value="2">2 แถว</option>
+                        <option value="3" selected>3 แถว</option>
                         <option value="4">4 แถว</option>
                         <option value="5">5 แถว</option>
                     </select>
+                </div>
+
+                <div class="input-group checkbox-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+                    <input type="checkbox" id="enable-barcode" style="width: auto; cursor: pointer;">
+                    <label for="enable-barcode" style="cursor: pointer; color: #b45309; font-weight: bold;">📊 เปิดใช้งานบาร์โค้ด EAN-13 ในบรรทัดสุดท้าย</label>
                 </div>
                 
                 <div id="text-inputs-container"></div>
