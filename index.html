@@ -6,7 +6,7 @@
     <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4) - Vector Text PDF</title>
     <link rel="stylesheet" href="style.css">
     
-    <link class="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2b579a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,6 +28,10 @@
         <div class="control-panel">
             <div class="panel-title">⚙️ ระบบตั้งค่าการพิมพ์ฉลากทีละขั้นตอน</div>
             
+            <button id="pwa-install-btn" class="btn btn-success" style="display: none; background-color: #1e3d6b; margin-bottom: 4px;">
+                📲 ติดตั้งแอปนี้ลงบนเครื่อง (ใช้งานแบบ Offline)
+            </button>
+
             <div class="step-container" style="background-color: #fffbeb; border: 1px solid #fef3c7;">
                 <div class="step-title" style="color: var(--orange-color)">💾 จัดการไฟล์ต้นฉบับ (.json)</div>
                 <div class="grid-2col">
