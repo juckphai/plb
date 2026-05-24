@@ -1,266 +1,378 @@
+:root {
+    --primary-color: #2b579a;
+    --primary-hover: #1e3d6b;
+    --success-color: #10b981;
+    --success-hover: #059669;
+    --excel-color: #1f7244;
+    --excel-hover: #154c2e;
+    --orange-color: #f59e0b;
+    --orange-hover: #d97706;
+    --bg-color: #64748b;
+    --panel-bg: #ffffff;
+    --border-color: #d1d5db;
+}
 
-        :root {
-            --primary-color: #2b579a;
-            --primary-hover: #1e3d6b;
-            --success-color: #10b981;
-            --success-hover: #059669;
-            --excel-color: #1f7244;
-            --excel-hover: #154c2e;
-            --orange-color: #f59e0b;
-            --orange-hover: #d97706;
-            --bg-color: #64748b;
-            --panel-bg: #ffffff;
-            --border-color: #d1d5db;
-        }
+* {
+    box-sizing: border-box;
+    font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f3f4f6;
+    color: #333;
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+}
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f3f4f6;
-            color: #333;
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            overflow: hidden;
-        }
+/* แถบนำทางบนมือถือ (ซ่อนเริ่มต้นบนคอมพิวเตอร์) */
+.mobile-nav-bar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 100;
+}
 
-        /* Control Panel Styles */
-        .control-panel {
-            width: 410px;
-            background-color: var(--panel-bg);
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
+.nav-tab {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
 
-        .panel-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin: 0;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 8px;
-        }
+.nav-tab.active {
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    background-color: #f8fafc;
+}
 
-        .step-container {
-            background-color: #f9fafb;
-            padding: 14px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+/* Control Panel Styles */
+.control-panel {
+    width: 410px;
+    background-color: var(--panel-bg);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
 
-        .step-title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border-bottom: 1px dashed #d1d5db;
-            padding-bottom: 4px;
-            margin-bottom: 4px;
-        }
+.panel-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 0;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 8px;
+}
 
-        .grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+.step-container {
+    background-color: #f9fafb;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-        .grid-4col {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-        }
+.step-title {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px dashed #d1d5db;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-        .input-group label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #4b5563;
-        }
+.grid-4col {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
 
-        .input-group input, .input-group select {
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            transition: border-color 0.2s;
-            width: 100%;
-        }
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(43, 87, 154, 0.15);
-        }
+.input-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4b5563;
+}
 
-        .dynamic-row-input {
-            background-color: #f3f4f6;
-            padding: 8px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary-color);
-            margin-bottom: 6px;
-        }
+.input-group input, .input-group select {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: border-color 0.2s;
+    width: 100%;
+}
 
-        .btn {
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
+.input-group input:focus, .input-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(43, 87, 154, 0.15);
+}
 
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-success { background-color: var(--success-color); }
-        .btn-success:hover { background-color: var(--success-hover); }
-        .btn-excel { background-color: var(--excel-color); }
-        .btn-excel:hover { background-color: var(--excel-hover); }
-        .btn-orange { background-color: var(--orange-color); }
-        .btn-orange:hover { background-color: var(--orange-hover); }
+.dynamic-row-input {
+    background-color: #f3f4f6;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+    margin-bottom: 6px;
+}
 
-        /* Preview Area Styles */
-        .preview-area {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background-color: var(--bg-color);
-        }
+.btn {
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
 
-        /* หน้า A4 รองรับการยืดหยุ่นระยะขอบ */
-        .a4-page {
-            width: 210mm;
-            height: 297mm;
-            min-width: 210mm;
-            min-height: 297mm;
-            background-color: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            position: relative;
-            box-sizing: border-box;
-            overflow: hidden;
-            display: block;
-        }
+.btn-primary { background-color: var(--primary-color); }
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-success { background-color: var(--success-color); }
+.btn-success:hover { background-color: var(--success-hover); }
+.btn-excel { background-color: var(--excel-color); }
+.btn-excel:hover { background-color: var(--excel-hover); }
+.btn-orange { background-color: var(--orange-color); }
+.btn-orange:hover { background-color: var(--orange-hover); }
 
-        /* Grid คอนเทนเนอร์หลัก */
-        .label-grid {
-            display: grid;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            align-content: start;
-        }
+/* Preview Area Styles */
+.preview-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: var(--bg-color);
+}
 
-        /* ดวงฉลากแต่ละดวง */
-        .label-item {
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            background-color: #fff;
-            position: relative;
-            padding: 1px 2px;
-        }
+.a4-container-scroll {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
 
-        /* แถวข้อความข้างในฉลาก */
-        .label-text-row {
-            width: 100%;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-            line-height: 1.1;
-        }
+/* ปุ่มย้อนกลับบนมือถือ */
+.mobile-back-btn {
+    display: none;
+}
 
-        .scale-wrapper {
-            display: inline-block;
-            transform-origin: center center;
-            white-space: nowrap;
-        }
+/* หน้า A4 รองรับการยืดหยุ่นระยะขอบ */
+.a4-page {
+    width: 210mm;
+    height: 297mm;
+    min-width: 210mm;
+    min-height: 297mm;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: block;
+}
 
-        .status-badge {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-align: center;
-            background-color: #eff6ff;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #bfdbfe;
-        }
+/* Grid คอนเทนเนอร์หลัก */
+.label-grid {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-content: start;
+}
 
-        .action-divider {
-            border-top: 2px dashed #d1d5db;
-            margin: 5px 0;
-        }
+/* ดวงฉลากแต่ละดวง */
+.label-item {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #fff;
+    position: relative;
+    padding: 1px 2px;
+}
 
-        /* การตั้งค่าพิมพ์ระดับเบราว์เซอร์เพื่อแปลง Text PDF คุณภาพสูง */
-        @media print {
-            @page {
-                size: A4 portrait;
-                margin: 0 !important;
-            }
-            html, body {
-                background-color: white;
-                height: 100% !important;
-                overflow: visible !important;
-            }
-            body { 
-                display: block !important;
-            }
-            .control-panel { 
-                display: none !important; 
-            }
-            .preview-area { 
-                background-color: white !important; 
-                padding: 0 !important; 
-                overflow: visible !important;
-                display: block !important;
-            }
-            .a4-page { 
-                box-shadow: none !important; 
-                margin: 0 !important; 
-                border: none !important;
-                page-break-inside: avoid;
-                page-break-after: avoid;
-                page-break-before: avoid;
-            }
-            .label-item { 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact; 
-            }
-        }
+/* แถวข้อความข้างในฉลาก */
+.label-text-row {
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    line-height: 1.1;
+}
+
+.scale-wrapper {
+    display: inline-block;
+    transform-origin: center center;
+    white-space: nowrap;
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-align: center;
+    background-color: #eff6ff;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #bfdbfe;
+}
+
+.action-divider {
+    border-top: 2px dashed #d1d5db;
+    margin: 5px 0;
+}
+
+/* 📱 สไตล์สำหรับหน้าจอขนาดเล็ก/โทรศัพท์มือถือ (กว้างไม่เกิน 850px) */
+@media screen and (max-width: 850px) {
+    body {
+        flex-direction: column;
+        padding-top: 50px; /* หลบแถบเนวิเกเตอร์ด้านบน */
+    }
+
+    .mobile-nav-bar {
+        display: flex;
+    }
+
+    /* ซ่อนแผงตั้งค่าและแผงพรีวิวไว้ก่อน และจะเปิดแสดงทีละหน้าผ่านคลาส .active */
+    .control-panel, .preview-area {
+        width: 100% !important;
+        height: calc(100vh - 50px);
+        position: absolute;
+        top: 50px;
+        left: 0;
+        display: none !important;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .control-panel.active {
+        display: flex !important;
+    }
+
+    .preview-area.active {
+        display: block !important; /* จัดการให้เลื่อนดูสกรอลล์สะดวก */
+        padding: 10px;
+        overflow-x: auto; /* เผื่อหน้ากระดาษ A4 กว้างกว่าหน้าจอมือถือ */
+    }
+
+    /* กล่องห่อหุ้มสำหรับสกรอลล์ดูหน้ากระดาษ A4 ในมือถือ */
+    .a4-container-scroll {
+        width: max-content;
+        min-width: 100%;
+        display: block;
+        padding-top: 45px; /* หลบปุ่มย้อนกลับ */
+    }
+
+    /* ปุ่มกดย้อนกลับลอยด้านบนในหน้าพรีวิวฉลาก */
+    .mobile-back-btn {
+        display: block;
+        position: fixed;
+        top: 60px;
+        left: 15px;
+        z-index: 120;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+    }
+    
+    /* ย่อขนาดสเกลพรีวิวของ A4 ให้เล็กลงเล็กน้อยบนอุปกรณ์เคลื่อนที่เพื่อการมองภาพรวม */
+    .a4-page {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+}
+
+/* การตั้งค่าพิมพ์ระดับเบราว์เซอร์เพื่อแปลง Text PDF คุณภาพสูง */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 0 !important;
+    }
+    html, body {
+        background-color: white;
+        height: 100% !important;
+        overflow: visible !important;
+        padding-top: 0 !important;
+    }
+    body { 
+        display: block !important;
+    }
+    .control-panel, .mobile-nav-bar, .mobile-back-btn { 
+        display: none !important; 
+    }
+    .preview-area { 
+        background-color: white !important; 
+        padding: 0 !important; 
+        overflow: visible !important;
+        display: block !important;
+        position: static !important;
+        height: auto !important;
+    }
+    .a4-container-scroll {
+        padding-top: 0 !important;
+        display: block !important;
+        width: auto !important;
+    }
+    .a4-page { 
+        box-shadow: none !important; 
+        margin: 0 !important; 
+        border: none !important;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+        page-break-before: avoid;
+    }
+    .label-item { 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+    }
+}

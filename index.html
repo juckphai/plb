@@ -2,12 +2,18 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4) - Vector Text PDF</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="control-panel">
+    <div class="mobile-nav-bar">
+        <button id="nav-setup-btn" class="nav-tab active" onclick="switchMobileTab('setup')">⚙️ ตั้งค่าฉลาก</button>
+        <button id="nav-preview-btn" class="nav-tab" onclick="switchMobileTab('preview')">👁️ ดูตัวอย่างฉลาก</button>
+    </div>
+
+    <div class="control-panel" id="setup-panel">
         <div class="panel-title">⚙️ ระบบตั้งค่าการพิมพ์ฉลากทีละขั้นตอน</div>
         
         <div class="step-container" style="background-color: #fffbeb; border: 1px solid #fef3c7;">
@@ -17,7 +23,7 @@
                     📥 บันทึกต้นฉบับ
                 </button>
                 <button class="btn btn-orange" onclick="document.getElementById('import-file').click()" style="font-size: 0.8rem; padding: 6px 10px;">
-                    📂 โหล่งต้นฉบับ
+                    📂 โหลดต้นฉบับ
                 </button>
             </div>
             <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importTemplate(event)">
@@ -95,7 +101,7 @@
             <div id="text-inputs-container"></div>
         </div>
 
-        <button class="btn btn-primary" onclick="renderLabelsGrid()" style="font-size: 1.05rem; padding: 12px;">
+        <button class="btn btn-primary" onclick="handleRenderAndShow()" style="font-size: 1.05rem; padding: 12px;">
             🔄 อัปเดตและแสดงตัวอย่างฉลาก
         </button>
 
@@ -115,9 +121,13 @@
         </div>
     </div>
 
-    <div class="preview-area">
-        <div class="a4-page" id="printable-a4-page">
-            <div class="label-grid" id="label-grid-container"></div>
+    <div class="preview-area" id="preview-panel">
+        <button class="mobile-back-btn" onclick="switchMobileTab('setup')">⬅️ กลับไปหน้าตั้งค่า</button>
+        
+        <div class="a4-container-scroll">
+            <div class="a4-page" id="printable-a4-page">
+                <div class="label-grid" id="label-grid-container"></div>
+            </div>
         </div>
     </div>
 
