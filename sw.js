@@ -1,4 +1,4 @@
-const CACHE_NAME = 'label-printer-pwa-v1';
+const CACHE_NAME = 'label-printer-pwa-v11';
 const ASSETS = [
   './',
   './index.html',
