@@ -1,0 +1,22 @@
+{
+  "short_name": "พิมพ์ฉลากA4",
+  "name": "โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4)",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040232.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040232.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#475569",
+  "theme_color": "#2b579a",
+  "display": "standalone",
+  "orientation": "portrait"
+}

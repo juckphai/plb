@@ -2,9 +2,27 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4) - Vector Text PDF</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA & Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2b579a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1040/1040232.png">
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker ลงทะเบียนสำเร็จ!', reg))
+                    .catch(err => console.log('Service Worker ลงทะเบียนล้มเหลว:', err));
+            });
+        }
+    </script>
 </head>
 <body>
 
@@ -133,6 +151,32 @@
         </div>
     </div>
 
+    <!-- เรียกใช้งาน JavaScript หลัก -->
     <script src="script.js"></script>
+    
+    <!-- ฝัง fallback script กรณีไม่มีไฟล์ภายนอก -->
+    <script>
+        (function() {
+            // ตรวจสอบว่า function หลักถูกโหลดหรือยัง ถ้ายังให้กำหนดค่าเริ่มต้น
+            if (typeof window.generateAndShowPreview !== 'function') {
+                console.warn("ไม่พบ script.js โปรดตรวจสอบไฟล์ script.js ในโฟลเดอร์เดียวกัน");
+                // สร้างฟังก์ชันเตือนสำหรับผู้ใช้
+                window.generateAndShowPreview = function() {
+                    alert("ไม่สามารถโหลดไฟล์ script.js ได้ กรุณาตรวจสอบไฟล์ script.js ในโฟลเดอร์เดียวกัน");
+                };
+                window.exportTemplate = function() { alert("ไม่พบฟังก์ชัน เนื่องจาก script.js ไม่ถูกโหลด"); };
+                window.importTemplate = function() { alert("ไม่พบฟังก์ชัน เนื่องจาก script.js ไม่ถูกโหลด"); };
+                window.backToSetup = function() { alert("ไม่พบฟังก์ชัน เนื่องจาก script.js ไม่ถูกโหลด"); };
+                window.exportToTextPDF = function() { alert("ไม่พบฟังก์ชัน เนื่องจาก script.js ไม่ถูกโหลด"); };
+                window.exportToExcel = function() { alert("ไม่พบฟังก์ชัน เนื่องจาก script.js ไม่ถูกโหลด"); };
+                
+                // สร้าง container สำหรับข้อความแสดง error
+                const container = document.getElementById('text-inputs-container');
+                if (container) {
+                    container.innerHTML = '<div style="background:#fee2e2; padding:12px; border-radius:8px; color:#b91c1c;">⚠️ ไม่สามารถโหลดไฟล์ script.js ได้ กรุณาตรวจสอบว่ามีไฟล์ script.js ในโฟลเดอร์เดียวกับไฟล์ HTML นี้</div>';
+                }
+            }
+        })();
+    </script>
 </body>
 </html>
