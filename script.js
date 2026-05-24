@@ -7,7 +7,7 @@ function generateInputFields() {
     const container = document.getElementById('text-inputs-container');
     container.innerHTML = '';
 
-    // จำนวนแถวที่เป็นข้อความปกติ (ถ้าเปิดบาร์โค้ด แถวสุดท้ายจะถูกหักออกไปเป็นช่องบาร์โค้ดแยก)
+    // จำนวนแถวที่เป็นข้อความปกติ (แถวสุดท้ายจะถูกแยกออกไปเป็นช่องบาร์โค้ด)
     const textRowsCount = isBarcodeEnabled ? rowCount - 1 : rowCount;
 
     // 1. สร้างช่องกรอกข้อความปกติ
@@ -29,12 +29,11 @@ function generateInputFields() {
         container.appendChild(rowDiv);
     }
 
-    // 2. ถ้าเปิดใช้งานบาร์โค้ด ให้สร้างช่องกรอกบาร์โค้ดพิเศษโผล่ขึ้นมาต่อท้าย
+    // 2. ถ้าเปิดใช้งานบาร์โค้ด สร้างช่องกรอกบาร์โค้ดพิเศษโผล่ขึ้นมาต่อท้าย
     if (isBarcodeEnabled) {
         const barcodeIndex = rowCount - 1; // ชี้ไปที่ดัชนีแถวสุดท้ายเสมอ
         const barcodeDiv = document.createElement('div');
         barcodeDiv.className = 'dynamic-row-input';
-        // กำหนดกรอบสีทอง/ส้มเพื่อให้ผู้ใช้เห็นเด่นชัดว่าเป็นช่องระบบบาร์โค้ด
         barcodeDiv.style.borderLeft = '3px solid var(--orange-color)';
         barcodeDiv.style.backgroundColor = '#fffbeb';
         
@@ -53,25 +52,21 @@ function generateInputFields() {
         `;
         container.appendChild(barcodeDiv);
 
-        // เพิ่มระบบจำกัดการป้อนข้อมูล: บังคับกรอกเฉพาะตัวเลขและห้ามเกิน 13 หลัก
+        // ดักจับการป้อนข้อมูล: บังคับกรอกเฉพาะตัวเลขและห้ามเกิน 13 หลัก
         const barcodeInput = document.getElementById('barcode-numeric-input');
         barcodeInput.addEventListener('input', (e) => {
-            // ลบทุกอักขระที่ไม่ใช่ตัวเลขออกทันที (Regex \D)
             let cleanValue = e.target.value.replace(/\D/g, '');
-            
-            // ตัดให้เหลือไม่เกิน 13 หลัก
             if (cleanValue.length > 13) {
                 cleanValue = cleanValue.substring(0, 13);
             }
-            
             e.target.value = cleanValue;
-            defaultTexts[barcodeIndex] = cleanValue; // อัปเดตลงในฐานข้อมูล
+            defaultTexts[barcodeIndex] = cleanValue;
         });
     }
 
     // ผูก Event Listener สำหรับช่องข้อความปกติ
     document.querySelectorAll('.label-input-text').forEach(input => {
-        if (input.id !== 'barcode-numeric-input') { // ยกเว้นช่องบาร์โค้ดที่จัดการแยกไปแล้ว
+        if (input.id !== 'barcode-numeric-input') {
             input.addEventListener('input', (e) => {
                 const idx = e.target.getAttribute('data-index');
                 defaultTexts[idx] = e.target.value;
@@ -158,7 +153,7 @@ function renderLabelsGrid() {
                 textRow.className = 'label-barcode-row';
                 
                 let barcodeValue = (defaultTexts[r] || "0000000000000").trim();
-                const svgHtml = generateEAN13Svg(barcodeValue);
+                const svgHtml = generateEAN13Svg(barcodeValue, widthMm);
                 textRow.innerHTML = svgHtml;
                 
                 labelBox.appendChild(textRow);
@@ -183,8 +178,8 @@ function renderLabelsGrid() {
     autoFitLabelFonts();
 }
 
-/* ─── ระบบวิเคราะห์และสร้างโครงสร้างบาร์โค้ด EAN-13 แบบ Native SVG ─── */
-function generateEAN13Svg(value) {
+/* ─── ระบบวิเคราะห์และสร้างโครงสร้างบาร์โค้ด EAN-13 (ปรับสมดุลเต็มกว้างและตัวเลขชัดเจน) ─── */
+function generateEAN13Svg(value, labelWidthMm) {
     let digits = value.replace(/\D/g, ''); 
     if (digits.length < 12) digits = digits.padStart(12, '0');
     digits = digits.substring(0, 12);
@@ -224,28 +219,33 @@ function generateEAN13Svg(value) {
     
     binaryString += "101"; 
 
-    let svgWidth = 115;
-    let svgHeight = 40;
-    let startX = 10;
-    let barWidth = 0.85;
+    // ตั้งสัดส่วน viewBox แบบพิกเซลจำลองเพื่อความเสถียรในการสเกล
+    let startX = 10; 
+    let barWidth = 1.2; 
+    let totalBarModules = binaryString.length * barWidth;
+    let svgWidth = totalBarModules + startX + 10; 
+    let svgHeight = 44; // เพิ่มพื้นที่แนวตั้งให้กับพื้นที่ทำงานรวม
 
     let paths = "";
     for (let i = 0; i < binaryString.length; i++) {
         if (binaryString[i] === '1') {
             let isGuard = (i < 3 || (i >= 45 && i < 50) || i >= 92);
-            let barHeight = isGuard ? 30 : 24;
-            paths += `<rect x="${startX + (i * barWidth)}" y="2" width="${barWidth}" height="${barHeight}" fill="#000000"/>`;
+            // ปรับระดับความสูงลงเล็กน้อยเพื่อให้เหลือพื้นที่สำหรับตัวเลขด้านล่างอย่างพอเพียง
+            let barHeight = isGuard ? 29 : 23;
+            paths += `<rect x="${startX + (i * barWidth)}" y="1" width="${barWidth}" height="${barHeight}" fill="#000000"/>`;
         }
     }
 
-    let textY = 36;
+    // จุดพิกัดแกน Y ของตัวเลข ขยับลงมาให้พ้นแถบเส้นอย่างเหมาะสม
+    let textY = 38;
     let labelHtml = `
-        <text x="${startX - 6}" y="${textY - 3}" font-family="Arial" font-size="8" fill="#000">${fullCode[0]}</text>
-        <text x="${startX + 4}" y="${textY}" font-family="Arial" font-size="8" letter-spacing="1.2" fill="#000">${fullCode.substring(1,7)}</text>
-        <text x="${startX + 50}" y="${textY}" font-family="Arial" font-size="8" letter-spacing="1.2" fill="#000">${fullCode.substring(7,13)}</text>
+        <text x="${startX - 7}" y="${textY - 3}" font-family="Arial, sans-serif" font-weight="bold" font-size="8.5" fill="#000">${fullCode[0]}</text>
+        <text x="${startX + (barWidth * 3.5)}" y="${textY}" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="${barWidth * 1.1}" fill="#000">${fullCode.substring(1,7)}</text>
+        <text x="${startX + (barWidth * 51.5)}" y="${textY}" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="${barWidth * 1.1}" fill="#000">${fullCode.substring(7,13)}</text>
     `;
 
-    return `<svg class="barcode-svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">${paths}${labelHtml}</svg>`;
+    // บังคับการแสดงผลผ่าน Object สไตล์ให้กว้างเต็มกรอบ 100% โดยที่กล่องพิกัดไม่ล้นขอบฉลาก
+    return `<svg class="barcode-svg" style="width: 100%; height: 100%; max-height: 100%; display: block; overflow: visible;" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet">${paths}${labelHtml}</svg>`;
 }
 
 function autoFitLabelFonts() {
@@ -308,7 +308,6 @@ function autoFitLabelFonts() {
 
 function generateAndShowPreview() {
     renderLabelsGrid();
-    document.getElementById('setup-page').className = 'page-view'; // ใช้รูปแบบเดิมเคลียร์คลาส
     document.getElementById('setup-page').classList.remove('active');
     document.getElementById('preview-page').classList.add('active');
     
@@ -426,7 +425,20 @@ document.getElementById('row-count').addEventListener('change', () => {
     generateInputFields();
 });
 
-document.getElementById('enable-barcode').addEventListener('change', () => {
+document.getElementById('enable-barcode').addEventListener('change', (e) => {
+    const rowCountSelect = document.getElementById('row-count');
+    let currentRows = parseInt(rowCountSelect.value);
+
+    if (e.target.checked) {
+        if (currentRows < 5) {
+            rowCountSelect.value = (currentRows + 1).toString();
+        }
+    } else {
+        if (currentRows > 1) {
+            rowCountSelect.value = (currentRows - 1).toString();
+        }
+    }
+    
     generateInputFields();
 });
 
