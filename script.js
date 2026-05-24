@@ -84,6 +84,8 @@ function renderLabelsGrid() {
     for (let i = 0; i < totalLabels; i++) {
         const labelBox = document.createElement('div');
         labelBox.className = 'label-item';
+        labelBox.style.display = 'grid';
+        labelBox.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
         
         if (borderStyle === 'none') {
             labelBox.style.border = 'none';
@@ -110,49 +112,72 @@ function renderLabelsGrid() {
     autoFitLabelFonts();
 }
 
+/* ─── ฟังก์ชันคำนวณขนาดอักษรอัตโนมัติ (เวอร์ชันปรับปรุงความแม่นยำภาษาไทย) ─── */
 function autoFitLabelFonts() {
     const items = document.querySelectorAll('.label-item');
-    
+
     items.forEach(labelBox => {
         const wrappers = labelBox.querySelectorAll('.scale-wrapper');
-        let fontSize = 36; 
-        
-        const setFonts = (size) => {
+        const rows = labelBox.querySelectorAll('.label-text-row');
+
+        let fontSize = 36;
+
+        const applyFont = (size) => {
             wrappers.forEach(span => {
                 span.style.fontSize = size + 'px';
                 span.style.transform = 'scale(1)';
             });
         };
 
-        setFonts(fontSize);
+        applyFont(fontSize);
 
-        while (labelBox.scrollHeight > labelBox.clientHeight && fontSize > 5) {
-            fontSize -= 0.5;
-            setFonts(fontSize);
+        // คำนวณความสูงต่อแถวจริง
+        const availableHeightPerRow = labelBox.clientHeight / rows.length;
+        let overflow = true;
+
+        while (overflow && fontSize > 4) {
+            overflow = false;
+            applyFont(fontSize);
+
+            rows.forEach(row => {
+                const span = row.querySelector('.scale-wrapper');
+                // ใช้ getBoundingClientRect แม่นยำกว่าตรวจสอบจากตัวกล่องโดยรวม
+                const textHeight = span.getBoundingClientRect().height;
+
+                // เผื่อพื้นที่ 8% สำหรับสระบน-ล่างและส่วนประกอบอักษรภาษาไทย
+                if (textHeight > (availableHeightPerRow * 0.92)) {
+                    overflow = true;
+                }
+            });
+
+            if (overflow) {
+                fontSize -= 0.5;
+            }
         }
 
+        // ปรับขนาดความกว้างแนวนอน (บีบอักษรหากข้อความยาวเกินพิกัดขอบฉลาก)
         wrappers.forEach(span => {
-            const parentRow = span.parentElement;
-            if (span.scrollWidth > parentRow.clientWidth) {
-                const ratio = parentRow.clientWidth / span.scrollWidth;
-                span.style.transform = `scale(${ratio * 0.94})`;
+            const maxAllowedWidth = labelBox.clientWidth * 0.94; // เผื่อขอบข้าง 6% ปลอดภัยไว้ก่อน
+            const textWidth = span.getBoundingClientRect().width;
+
+            if (textWidth > maxAllowedWidth) {
+                const ratio = maxAllowedWidth / textWidth;
+                span.style.transform = `scale(${ratio})`;
             }
         });
     });
 }
 
 // ─── ระบบควบคุมการเปลี่ยนหน้าจอ ───
-
-// กดปุ่มเพื่อคำนวณและสลับไปหน้าพรีวิวฉลาก
 function generateAndShowPreview() {
     renderLabelsGrid();
     document.getElementById('setup-page').classList.remove('active');
     document.getElementById('preview-page').classList.add('active');
-    // คำนวณขนาดฟอนต์ซ้ำอีกรอบหลังจากเปลี่ยนหน้าเพื่อให้ได้ขนาดที่เป๊ะที่สุด
-    setTimeout(autoFitLabelFonts, 50); 
+    
+    setTimeout(autoFitLabelFonts, 50);
+    setTimeout(autoFitLabelFonts, 150); 
 }
 
-// กดปุ่มเพื่อปิดหน้าพรีวิวและย้อนกลับมาหน้าตั้งค่าแรก
 function backToSetup() {
     document.getElementById('preview-page').classList.remove('active');
     document.getElementById('setup-page').classList.add('active');
@@ -180,14 +205,7 @@ function exportTemplate() {
 
     if (userFilename === "") {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        
-        userFilename = `label_template_${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+        userFilename = `label_template_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
 
     if (!userFilename.toLowerCase().endsWith('.json')) {
@@ -230,7 +248,7 @@ function importTemplate(event) {
             alert("📂 โหลดโครงสร้างต้นฉบับเรียบร้อยแล้วครับ! (กดปุ่มอัปเดตเพื่อดูตัวอย่าง)");
             backToSetup();
         } catch (err) {
-            alert("❌ ไฟล์ต้นฉบับไม่ถูกต้องหรือไม่สมบูรณ์ ไม่สามารถเปิดได้ครับ");
+            alert("❌ ไฟล์ต้นฉบับไม่ถูกต้องหรือไม่สมบูรณ์");
         }
     };
     reader.readAsText(file);
