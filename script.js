@@ -73,7 +73,7 @@ function renderLabelsGrid() {
         return;
     }
 
-    statusBadge.innerHTML = `📊 บรรจุได้เต็มที่: ${cols} คอลัมน์ × ${rows} แถว<br>(รวมทั้งสิ้น ${totalLabels} ดวง / หน้า A4)`;
+    statusBadge.innerHTML = `📊 บรรจุได้เต็มที่: ${cols} คอลัมน์ × ${rows} แถว (รวม ${totalLabels} ดวง/หน้า)`;
 
     const gridContainer = document.getElementById('label-grid-container');
     gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${widthMm}mm)`;
@@ -141,34 +141,21 @@ function autoFitLabelFonts() {
     });
 }
 
-// ฟังก์ชันเมื่อกดอัปเดต: เรนเดอร์เสร็จแล้วสลับไปหน้าพรีวิวให้ทันที (สำหรับโมบายล์)
-function handleRenderAndShow() {
+// ─── ระบบควบคุมการเปลี่ยนหน้าจอ ───
+
+// กดปุ่มเพื่อคำนวณและสลับไปหน้าพรีวิวฉลาก
+function generateAndShowPreview() {
     renderLabelsGrid();
-    if (window.innerWidth <= 850) {
-        switchMobileTab('preview');
-    }
+    document.getElementById('setup-page').classList.remove('active');
+    document.getElementById('preview-page').classList.add('active');
+    // คำนวณขนาดฟอนต์ซ้ำอีกรอบหลังจากเปลี่ยนหน้าเพื่อให้ได้ขนาดที่เป๊ะที่สุด
+    setTimeout(autoFitLabelFonts, 50); 
 }
 
-// ฟังก์ชันสลับการมองเห็นบนหน้าจอมือถือ
-function switchMobileTab(target) {
-    const setupPanel = document.getElementById('setup-panel');
-    const previewPanel = document.getElementById('preview-panel');
-    const navSetup = document.getElementById('nav-setup-btn');
-    const navPreview = document.getElementById('nav-preview-btn');
-
-    if (target === 'setup') {
-        setupPanel.classList.add('active');
-        previewPanel.classList.remove('active');
-        if(navSetup) navSetup.classList.add('active');
-        if(navPreview) navPreview.classList.remove('active');
-    } else {
-        setupPanel.classList.remove('active');
-        previewPanel.classList.add('active');
-        if(navSetup) navSetup.classList.remove('active');
-        if(navPreview) navPreview.classList.add('active');
-        // รัน fit font อีกรอบเผื่อมิติกล่องเปลี่ยนตอนสลับแท็บ
-        setTimeout(autoFitLabelFonts, 50);
-    }
+// กดปุ่มเพื่อปิดหน้าพรีวิวและย้อนกลับมาหน้าตั้งค่าแรก
+function backToSetup() {
+    document.getElementById('preview-page').classList.remove('active');
+    document.getElementById('setup-page').classList.add('active');
 }
 
 function exportTemplate() {
@@ -240,12 +227,8 @@ function importTemplate(event) {
             defaultStyles = configData.styles;
 
             generateInputFields();
-            renderLabelsGrid();
-            
-            alert("📂 โหลดโครงสร้างต้นฉบับเรียบร้อยแล้วครับ!");
-            if (window.innerWidth <= 850) {
-                switchMobileTab('setup');
-            }
+            alert("📂 โหลดโครงสร้างต้นฉบับเรียบร้อยแล้วครับ! (กดปุ่มอัปเดตเพื่อดูตัวอย่าง)");
+            backToSetup();
         } catch (err) {
             alert("❌ ไฟล์ต้นฉบับไม่ถูกต้องหรือไม่สมบูรณ์ ไม่สามารถเปิดได้ครับ");
         }
@@ -287,10 +270,4 @@ document.getElementById('row-count').addEventListener('change', () => {
 
 window.onload = function() {
     generateInputFields();
-    renderLabelsGrid();
-    // ตั้งค่าเริ่มต้นของโหมด Mobile View
-    if (window.innerWidth <= 850) {
-        switchMobileTab('setup');
-    }
-    setTimeout(renderLabelsGrid, 400);
 };
