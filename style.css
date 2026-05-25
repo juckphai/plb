@@ -211,7 +211,11 @@ body {
     align-items: flex-start;
 }
 
+/* ปรับปรุงโครงสร้างเพื่อให้รองรับหลายหน้า A4 เรียงกันในหน้าจอพรีวิว */
 .a4-scroll-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     width: max-content;
     height: auto;
     padding-bottom: 30px;
@@ -315,7 +319,7 @@ body {
     }
 }
 
-/* 🖨️ สไตล์สำหรับการเซฟเป็น PDF */
+/* 🖨️ สไตล์สำหรับการเซฟเป็น PDF (รองรับ Multi-page) */
 @media print {
     @page {
         size: A4 portrait;
@@ -323,7 +327,7 @@ body {
     }
     html, body {
         background-color: white;
-        height: 100% !important;
+        height: auto !important;
         overflow: visible !important;
     }
     body * {
@@ -340,7 +344,7 @@ body {
         top: 0;
         left: 0;
         width: 210mm;
-        height: 297mm;
+        height: auto !important;
         padding: 0 !important;
         margin: 0 !important;
         overflow: visible !important;
@@ -350,12 +354,14 @@ body {
     .a4-scroll-wrapper {
         padding: 0 !important;
         margin: 0 !important;
+        gap: 0 !important; /* ดึงช่องว่างระหว่างหน้าออกเมื่อสั่งพิมพ์จริง */
     }
     .a4-page {
         box-shadow: none !important;
         border: none !important;
         margin: 0 !important;
         page-break-inside: avoid;
+        page-break-after: always; /* บังคับให้หน้าถัดไปขึ้นกระดาษแผ่นใหม่ */
     }
     .label-item {
         -webkit-print-color-adjust: exact;

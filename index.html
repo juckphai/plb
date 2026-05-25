@@ -122,6 +122,15 @@
                 <div id="text-inputs-container"></div>
             </div>
 
+            <div class="step-container" style="background-color: #f0fdf4; border: 1px solid #bbf7d0;">
+                <div class="step-title" style="color: var(--success-hover)">🎯 ขั้นตอนที่ 4: จำนวนฉลากที่ต้องการพิมพ์</div>
+                <div class="input-group">
+                    <label style="font-weight: bold; color: #166534;">ระบุจำนวนดวงที่ต้องการพิมพ์ทั้งหมด</label>
+                    <input type="number" id="total-print-qty" value="40" min="1" max="1000" step="1">
+                </div>
+                <p style="margin: 0; font-size: 0.75rem; color: #15803d;">*ถ้าระบุเกินความจุต่อหน้า ระบบจะเพิ่มหน้ากระดาษ A4 ถัดไปให้ทันที</p>
+            </div>
+
             <button class="btn btn-primary" onclick="generateAndShowPreview()" style="font-size: 1.1rem; padding: 14px;">
                 👁️ อัปเดตและแสดงตัวอย่างฉลาก
             </button>
@@ -148,11 +157,8 @@
         </div>
 
         <div class="preview-area">
-            <div class="a4-scroll-wrapper">
-                <div class="a4-page" id="printable-a4-page">
-                    <div class="label-grid" id="label-grid-container"></div>
+            <div class="a4-scroll-wrapper" id="a4-pages-container">
                 </div>
-            </div>
         </div>
     </div>
 
