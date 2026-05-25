@@ -1,6 +1,25 @@
 let defaultTexts = ["สินค้าแนะนำ", "฿199.-", "8851234567890", "ลดล้างสต๊อก", "PROMO-2026"];
 let defaultStyles = ["normal", "bold", "normal", "normal", "normal"];
 
+function handlePaperSizeChange() {
+    const sizeSelect = document.getElementById('paper-size-select').value;
+    const customDiv = document.getElementById('custom-paper-dimensions');
+    const widthInput = document.getElementById('paper-width');
+    const heightInput = document.getElementById('paper-height');
+
+    if (sizeSelect === 'A4') {
+        customDiv.style.display = 'none';
+        widthInput.value = "210";
+        heightInput.value = "297";
+    } else if (sizeSelect === 'Letter') {
+        customDiv.style.display = 'none';
+        widthInput.value = "215.9";
+        heightInput.value = "279.4";
+    } else if (sizeSelect === 'custom') {
+        customDiv.style.display = 'grid';
+    }
+}
+
 function generateInputFields() {
     const rowCount = parseInt(document.getElementById('row-count').value);
     const isBarcodeEnabled = document.getElementById('enable-barcode').checked;
@@ -78,6 +97,10 @@ function generateInputFields() {
 }
 
 function renderLabelsGrid() {
+    // ดึงค่าขนาดกระดาษที่ตั้งค่าจากผู้ใช้
+    const paperWidth = parseFloat(document.getElementById('paper-width').value) || 210;
+    const paperHeight = parseFloat(document.getElementById('paper-height').value) || 297;
+
     const marginTop = parseFloat(document.getElementById('margin-top').value) || 0;
     const marginBottom = parseFloat(document.getElementById('margin-bottom').value) || 0;
     const marginLeft = parseFloat(document.getElementById('margin-left').value) || 0;
@@ -91,35 +114,39 @@ function renderLabelsGrid() {
     const rowCount = parseInt(document.getElementById('row-count').value);
     const isBarcodeEnabled = document.getElementById('enable-barcode').checked;
     
-    // ดึงค่าจำนวนดวงที่ต้องการพิมพ์จริงจากผู้ใช้
     const totalPrintQty = parseInt(document.getElementById('total-print-qty').value) || 1;
 
-    const maxPrintableWidth = 210 - (marginLeft + marginRight); 
-    const maxPrintableHeight = 297 - (marginTop + marginBottom);
+    const maxPrintableWidth = paperWidth - (marginLeft + marginRight); 
+    const maxPrintableHeight = paperHeight - (marginTop + marginBottom);
 
     const cols = Math.floor((maxPrintableWidth + gapX) / (widthMm + gapX));
     const rows = Math.floor((maxPrintableHeight + gapY) / (heightMm + gapY));
-    const labelsPerPage = cols * rows; // จำนวนดวงสูงสุดต่อ 1 หน้ากระดาษ
+    const labelsPerPage = cols * rows; 
 
     const statusBadge = document.getElementById('live-status-badge');
     const pagesContainer = document.getElementById('a4-pages-container');
-    pagesContainer.innerHTML = ''; // ล้างหน้าเก่าทั้งหมดออกก่อน
+    pagesContainer.innerHTML = ''; 
 
     if (cols <= 0 || rows <= 0) {
-        statusBadge.innerHTML = `<span style="color:#ef4444;">❌ ระยะขอบหรือขนาดฉลากใหญ่เกินพิกัด A4</span>`;
+        statusBadge.innerHTML = `<span style="color:#ef4444;">❌ ระยะขอบหรือขนาดฉลากใหญ่เกินพิกัดหน้ากระดาษ</span>`;
         return;
     }
 
-    // คำนวณจำนวนหน้ากระดาษที่ต้องใช้จริงตามจำนวนดวงที่ระบุ
     const totalPagesRequired = Math.ceil(totalPrintQty / labelsPerPage);
     statusBadge.innerHTML = `📊 เต็มหน้าจุได้: ${cols}×${rows} (${labelsPerPage} ดวง/หน้า) | พิมพ์จริง: ${totalPrintQty} ดวง (ใช้กระดาษ ${totalPagesRequired} หน้า)`;
 
     let currentLabelIndex = 0;
 
-    // ลูปสร้างหน้ากระดาษ A4 ตามจำนวนหน้าที่คำนวณได้จริง
     for (let p = 0; p < totalPagesRequired; p++) {
         const a4Page = document.createElement('div');
         a4Page.className = 'a4-page';
+        
+        // ผูกขนาดกระดาษแบบ Dynamic ให้สอดคล้องกับค่าที่ผู้ใช้ป้อนมา
+        a4Page.style.width = `${paperWidth}mm`;
+        a4Page.style.height = `${paperHeight}mm`;
+        a4Page.style.minWidth = `${paperWidth}mm`;
+        a4Page.style.minHeight = `${paperHeight}mm`;
+
         a4Page.style.paddingTop = `${marginTop}mm`;
         a4Page.style.paddingBottom = `${marginBottom}mm`;
         a4Page.style.paddingLeft = `${marginLeft}mm`;
@@ -131,7 +158,6 @@ function renderLabelsGrid() {
         gridContainer.style.gridTemplateRows = `repeat(${rows}, ${heightMm}mm)`;
         gridContainer.style.gap = `${gapY}mm ${gapX}mm`;
 
-        // คำนวณจำนวนดวงที่จะใส่ในหน้าปัจจุบัน (หน้าสุดท้ายอาจไม่เต็มหน้า)
         const labelsInThisPage = Math.min(labelsPerPage, totalPrintQty - currentLabelIndex);
 
         for (let i = 0; i < labelsInThisPage; i++) {
@@ -187,6 +213,18 @@ function renderLabelsGrid() {
     }
 
     autoFitLabelFonts();
+    updatePrintPageStyle(paperWidth, paperHeight); // อัปเดต CSS @page สำหรับเวลาสั่งพิมพ์ PDF
+}
+
+// ฟังก์ชันสร้างสไตล์ @page แบบไดนามิกเพื่อเวลาสั่งพิมพ์ขนาดจะตรงกับที่ระบุ
+function updatePrintPageStyle(w, h) {
+    let styleEl = document.getElementById('dynamic-page-print-style');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamic-page-print-style';
+        document.head.appendChild(styleEl);
+    }
+    styleEl.innerHTML = `@media print { @page { size: ${w}mm ${h}mm; margin: 0 !important; } }`;
 }
 
 function generateEAN13Svg(value, labelWidthMm) {
@@ -328,6 +366,9 @@ function backToSetup() {
 
 function exportTemplate() {
     const configData = {
+        paperSizeSelect: document.getElementById('paper-size-select').value,
+        paperWidth: document.getElementById('paper-width').value,
+        paperHeight: document.getElementById('paper-height').value,
         marginTop: document.getElementById('margin-top').value,
         marginBottom: document.getElementById('margin-bottom').value,
         marginLeft: document.getElementById('margin-left').value,
@@ -339,7 +380,7 @@ function exportTemplate() {
         borderStyle: document.getElementById('border-style').value,
         rowCount: document.getElementById('row-count').value,
         barcodeEnabled: document.getElementById('enable-barcode').checked,
-        printQty: document.getElementById('total-print-qty').value, // เพิ่มบันทึกจำนวนดวง
+        printQty: document.getElementById('total-print-qty').value, 
         texts: defaultTexts,
         styles: defaultStyles
     };
@@ -375,6 +416,12 @@ function importTemplate(event) {
         try {
             const configData = JSON.parse(e.target.result);
             
+            document.getElementById('paper-size-select').value = configData.paperSizeSelect || 'A4';
+            document.getElementById('paper-width').value = configData.paperWidth || 210;
+            document.getElementById('paper-height').value = configData.paperHeight || 297;
+            
+            handlePaperSizeChange(); // เรียกเพื่อเปิดปิดกล่องกรอก Custom อัตโนมัติ
+
             document.getElementById('margin-top').value = configData.marginTop;
             document.getElementById('margin-bottom').value = configData.marginBottom;
             document.getElementById('margin-left').value = configData.marginLeft;
@@ -386,7 +433,7 @@ function importTemplate(event) {
             document.getElementById('border-style').value = configData.borderStyle;
             document.getElementById('row-count').value = configData.rowCount;
             document.getElementById('enable-barcode').checked = configData.barcodeEnabled || false;
-            document.getElementById('total-print-qty').value = configData.printQty || 40; // โหลดค่าจำนวนดวงกลับมา
+            document.getElementById('total-print-qty').value = configData.printQty || 40; 
             
             defaultTexts = configData.texts;
             defaultStyles = configData.styles;

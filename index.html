@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ (A4) - Vector Text PDF</title>
+    <title>โปรแกรมออกแบบและพิมพ์ฉลากอเนกประสงค์อัตโนมัติ - Vector Text PDF</title>
     <link rel="stylesheet" href="style.css">
     
     <link rel="manifest" href="manifest.json">
@@ -46,7 +46,29 @@
             </div>
 
             <div class="step-container">
-                <div class="step-title">📋 ขั้นตอนที่ 1: ตั้งค่าระยะขอบกระดาษ A4 (มม.)</div>
+                <div class="step-title">📄 ขั้นตอนที่ 1.1: เลือกขนาดหน้ากระดาษ</div>
+                <div class="input-group">
+                    <label>ขนาดกระดาษ</label>
+                    <select id="paper-size-select" onchange="handlePaperSizeChange()">
+                        <option value="A4" selected>A4 (210 × 297 มม.)</option>
+                        <option value="Letter">Letter (215.9 × 279.4 มม.)</option>
+                        <option value="custom">กำหนดขนาดเอง (Custom)</option>
+                    </select>
+                </div>
+                <div class="grid-2col" id="custom-paper-dimensions" style="display: none;">
+                    <div class="input-group">
+                        <label>ความกว้างกระดาษ (มม.)</label>
+                        <input type="number" id="paper-width" value="210" min="10" max="1000" step="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label>ความสูงกระดาษ (มม.)</label>
+                        <input type="number" id="paper-height" value="297" min="10" max="1000" step="0.5">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-title">📋 ขั้นตอนที่ 1.2: ตั้งค่าระยะขอบกระดาษ (มม.)</div>
                 <div class="grid-4col">
                     <div class="input-group">
                         <label>ขอบบน</label>
@@ -128,7 +150,7 @@
                     <label style="font-weight: bold; color: #166534;">ระบุจำนวนดวงที่ต้องการพิมพ์ทั้งหมด</label>
                     <input type="number" id="total-print-qty" value="40" min="1" max="1000" step="1">
                 </div>
-                <p style="margin: 0; font-size: 0.75rem; color: #15803d;">*ถ้าระบุเกินความจุต่อหน้า ระบบจะเพิ่มหน้ากระดาษ A4 ถัดไปให้ทันที</p>
+                <p style="margin: 0; font-size: 0.75rem; color: #15803d;">*ถ้าระบุเกินความจุต่อหน้า ระบบจะเพิ่มหน้ากระดาษถัดไปให้ทันที</p>
             </div>
 
             <button class="btn btn-primary" onclick="generateAndShowPreview()" style="font-size: 1.1rem; padding: 14px;">
@@ -158,7 +180,7 @@
 
         <div class="preview-area">
             <div class="a4-scroll-wrapper" id="a4-pages-container">
-                </div>
+            </div>
         </div>
     </div>
 
