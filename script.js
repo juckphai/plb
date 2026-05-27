@@ -8,6 +8,10 @@ function handlePaperSizeChange() {
     const widthInput = document.getElementById('paper-width');
     const heightInput = document.getElementById('paper-height');
 
+    // เก็บค่าปัจจุบันในช่องกรอกไว้ก่อน ในกรณีที่ผู้ใช้กำลังพิมพ์ขนาดเอง
+    let currentW = parseFloat(widthInput.value) || 210;
+    let currentH = parseFloat(heightInput.value) || 297;
+
     if (sizeSelect === 'A4') {
         customDiv.style.display = 'none';
         if (orientation === 'portrait') {
@@ -28,6 +32,14 @@ function handlePaperSizeChange() {
         }
     } else if (sizeSelect === 'custom') {
         customDiv.style.display = 'grid';
+        // ตรวจสอบว่าค่าปัจจุบันขัดกับทิศทางที่เลือกหรือไม่ ถ้าขัดกันให้สลับด้านอัตโนมัติ
+        if (orientation === 'portrait' && currentW > currentH) {
+            widthInput.value = currentH;
+            heightInput.value = currentW;
+        } else if (orientation === 'landscape' && currentH > currentW) {
+            widthInput.value = currentH;
+            heightInput.value = currentW;
+        }
     }
 }
 
@@ -109,8 +121,16 @@ function generateInputFields() {
 
 function renderLabelsGrid() {
     // ดึงค่าขนาดกระดาษที่ตั้งค่าจากผู้ใช้
-    const paperWidth = parseFloat(document.getElementById('paper-width').value) || 210;
-    const paperHeight = parseFloat(document.getElementById('paper-height').value) || 297;
+    let paperWidth = parseFloat(document.getElementById('paper-width').value) || 210;
+    let paperHeight = parseFloat(document.getElementById('paper-height').value) || 297;
+    const orientation = document.getElementById('paper-orientation').value;
+
+    // ดักจับเคสกระดาษ Custom: บังคับทิศทางกว้าง/สูง ให้สอดคล้องกับแนวตั้งแนวนอนที่เลือกจริงป้องกันผู้ใช้กรอกสลับสับสน
+    if (orientation === 'portrait' && paperWidth > paperHeight) {
+        let temp = paperWidth; paperWidth = paperHeight; paperHeight = temp;
+    } else if (orientation === 'landscape' && paperHeight > paperWidth) {
+        let temp = paperWidth; paperWidth = paperHeight; paperHeight = temp;
+    }
 
     const marginTop = parseFloat(document.getElementById('margin-top').value) || 0;
     const marginBottom = parseFloat(document.getElementById('margin-bottom').value) || 0;
