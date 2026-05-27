@@ -47,13 +47,22 @@
 
             <div class="step-container">
                 <div class="step-title">📄 ขั้นตอนที่ 1.1: เลือกขนาดหน้ากระดาษ</div>
-                <div class="input-group">
-                    <label>ขนาดกระดาษ</label>
-                    <select id="paper-size-select" onchange="handlePaperSizeChange()">
-                        <option value="A4" selected>A4 (210 × 297 มม.)</option>
-                        <option value="Letter">Letter (215.9 × 279.4 มม.)</option>
-                        <option value="custom">กำหนดขนาดเอง (Custom)</option>
-                    </select>
+                <div class="grid-2col">
+                    <div class="input-group">
+                        <label>ขนาดกระดาษ</label>
+                        <select id="paper-size-select" onchange="handlePaperSizeChange()">
+                            <option value="A4" selected>A4 (210 × 297 มม.)</option>
+                            <option value="Letter">Letter (215.9 × 279.4 มม.)</option>
+                            <option value="custom">กำหนดขนาดเอง (Custom)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>ทิศทางกระดาษ</label>
+                        <select id="paper-orientation" onchange="handlePaperSizeChange()">
+                            <option value="portrait" selected>แนวตั้ง (Portrait)</option>
+                            <option value="landscape">แนวนอน (Landscape)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid-2col" id="custom-paper-dimensions" style="display: none;">
                     <div class="input-group">

@@ -3,18 +3,29 @@ let defaultStyles = ["normal", "bold", "normal", "normal", "normal"];
 
 function handlePaperSizeChange() {
     const sizeSelect = document.getElementById('paper-size-select').value;
+    const orientation = document.getElementById('paper-orientation').value;
     const customDiv = document.getElementById('custom-paper-dimensions');
     const widthInput = document.getElementById('paper-width');
     const heightInput = document.getElementById('paper-height');
 
     if (sizeSelect === 'A4') {
         customDiv.style.display = 'none';
-        widthInput.value = "210";
-        heightInput.value = "297";
+        if (orientation === 'portrait') {
+            widthInput.value = "210";
+            heightInput.value = "297";
+        } else {
+            widthInput.value = "297";
+            heightInput.value = "210";
+        }
     } else if (sizeSelect === 'Letter') {
         customDiv.style.display = 'none';
-        widthInput.value = "215.9";
-        heightInput.value = "279.4";
+        if (orientation === 'portrait') {
+            widthInput.value = "215.9";
+            heightInput.value = "279.4";
+        } else {
+            widthInput.value = "279.4";
+            heightInput.value = "215.9";
+        }
     } else if (sizeSelect === 'custom') {
         customDiv.style.display = 'grid';
     }
@@ -367,6 +378,7 @@ function backToSetup() {
 function exportTemplate() {
     const configData = {
         paperSizeSelect: document.getElementById('paper-size-select').value,
+        paperOrientation: document.getElementById('paper-orientation').value,
         paperWidth: document.getElementById('paper-width').value,
         paperHeight: document.getElementById('paper-height').value,
         marginTop: document.getElementById('margin-top').value,
@@ -417,6 +429,7 @@ function importTemplate(event) {
             const configData = JSON.parse(e.target.result);
             
             document.getElementById('paper-size-select').value = configData.paperSizeSelect || 'A4';
+            document.getElementById('paper-orientation').value = configData.paperOrientation || 'portrait';
             document.getElementById('paper-width').value = configData.paperWidth || 210;
             document.getElementById('paper-height').value = configData.paperHeight || 297;
             
